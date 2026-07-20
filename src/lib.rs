@@ -95,6 +95,37 @@ impl<K, V> LfuCache<K, V>
         }
         return None;
     } 
+    pub fn insert(&mut self, key: K, value: V) {
+        let hash = calc_hash(&key);
+        let starting_index = hash as usize;
+        let mask = self.capacity - 1;
+        let mut i: usize = 0;
+
+        if self.capacity == self.size {
+            self.remove_least_used();
+        }
+
+        loop {
+            let index: usize = (starting_index + (i * i + i) / 2) & mask;
+
+            if let Slot::Occupied(k, _) = &self.data[index] {
+                if *k == key {
+                    self.data[index] = Slot::Occupied(key.clone(), value.clone());
+                    let Some(ref mut fq) = self.fqs[index] else { return; };
+                    *fq += 1;
+                    return;
+                }else {
+                    i+=1;
+                }
+            }else {
+                self.data[index] = Slot::Occupied(key.clone(), value.clone());
+                self.fqs[index] = Some(0 as u128);
+                self.size += 1;
+                return;
+            }
+            if i == mask { return; }
+        }
+    }
     pub fn remove_least_used(&mut self) {
         let mut i: usize = 0;
         let mut least_used: Option<usize> = None;
