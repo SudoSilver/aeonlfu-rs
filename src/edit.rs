@@ -36,6 +36,32 @@ impl<K, V> LfuCache<K, V>
             if i == mask { return; }
         }
     }
+    pub fn remove(&mut self, key: &K) -> Option<V> {
+        let hash = calc_hash(&key);
+        let starting_index = hash as usize;
+        let mask = self.capacity - 1;
+        let mut i: usize = 0;
+        
+        loop {
+            let index: usize = (starting_index + (i * i + i) / 2) & mask;
+            if let Slot::Occupied(k, v) = &self.data[index] {
+                if *k == *key {
+                    let value = v.clone();
+                    self.fqs[index] = None;
+                    self.data[index] = Slot::Dead;
+                    self.size -= 1;
+                    return Some(value);
+                }else {
+                    i+=1;
+                }
+            }else if let Slot::NeverOccupied = &self.data[index] {
+                return None;
+            }else {
+                i+=1;
+            }
+            if i == mask { return None; }
+        }
+    }
     pub fn remove_least_used(&mut self) {
         let mut i: usize = 0;
         let mut least_used: Option<usize> = None;
