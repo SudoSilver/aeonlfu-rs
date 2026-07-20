@@ -58,7 +58,43 @@ impl<K, V> LfuCache<K, V>
             if i == mask { break; }
         }
         return None;
-    }       
+    } 
+    pub fn get_mut(&mut self, key: &K) -> Option<&mut V> {
+        let hash = calc_hash(&key);
+        let starting_index = hash as usize;
+        let mask = self.capacity - 1;
+        let mut i: usize = 0;
+        loop {
+            let index: usize = (starting_index + (i * i + i) / 2) & mask;
+
+            let matched = match &self.data[index] {
+                Slot::Occupied(k, _) => *k == *key,
+                _ => false,
+            };
+
+            if matched {
+                if let Some(ref mut fq) = self.fqs[index] {
+                    *fq += 1;
+                }
+                return match &mut self.data[index] {
+                    Slot::Occupied(_, v) => Some(v),
+                    _ => None,
+                };
+            }
+
+            let is_never_occupied = match &self.data[index] {
+                Slot::NeverOccupied => true,
+                _ => false,
+            };
+            if is_never_occupied {
+                break;
+            }
+
+            i += 1;
+            if i == mask { break; }
+        }
+        return None;
+    } 
     pub fn remove_least_used(&mut self) {
         let mut i: usize = 0;
         let mut least_used: Option<usize> = None;
