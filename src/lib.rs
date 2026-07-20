@@ -54,9 +54,30 @@ impl<K, V> LfuCache<K, V>
             }else {
                 i+=1;
             }
-            
+
             if i == mask { break; }
         }
         return None;
     }       
+    pub fn remove_least_used(&mut self) {
+        let mut i: usize = 0;
+        let mut least_used: Option<usize> = None;
+        let mut lowest_usage: u128 = u128::MAX;  
+
+        while i < self.capacity {
+            if let Some(fq) = self.fqs[i] {
+                if fq < lowest_usage {
+                    least_used = Some(i);
+                    lowest_usage = fq;
+                }
+            }  
+            i += 1;
+        } 
+ 
+        if let Some(index) = least_used {
+            self.fqs[index] = None;
+            self.data[index] = Slot::Dead;
+            self.size -= 1;
+        }
+    }
 }
