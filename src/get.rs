@@ -66,4 +66,7 @@ impl<K, V> LfuCache<K, V>
         }
         return None;
     } 
+    pub fn len(&self) -> usize {
+        return self.size;
+    }
 } 
