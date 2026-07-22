@@ -66,4 +66,25 @@ impl<K, V> LfuCache<K, V>
         }
         return None;
     } 
+    pub fn contains_key(&self, key: &K) -> bool {
+        let hash = calc_hash(key);
+        let starting_index = hash as usize;
+        let mask = self.capacity - 1;
+        let mut i: usize = 0;
+        loop {
+            let index: usize = (starting_index + (i * i + i)/ 2) & mask;
+
+            if let Slot::Occupied(k, _) = &self.data[index] {
+                if *k == *key {
+                    return true;
+                }
+                i+=1;
+            }else if let Slot::Dead = &self.data[index] {
+                i += 1;
+            }else if let Slot::NeverOccupied = &self.data[index] {
+                return false;
+            } 
+            if i > mask { return false; }
+        }
+    }
 } 
