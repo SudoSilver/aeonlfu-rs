@@ -5,6 +5,9 @@ use std::hash::Hash;
 impl<K, V> LfuCache<K, V> 
     where K: Hash + Clone + Eq, 
     V: Clone + PartialEq {
+    /// `.get(&K)` takes a referance to a key and returns an immutable referance to its value.
+    /// If the value does not exist it returns None. 
+    /// This incraments the access frequency of the slot which the Key Value pair belongs in.
     pub fn get(&mut self, key: &K) -> Option<&V> {
         let hash = calc_hash(&key);
         let starting_index = hash as usize;
@@ -30,6 +33,9 @@ impl<K, V> LfuCache<K, V>
         }
         return None;
     } 
+    /// `.get_mut(&K)` takes a referance to a key and returns a mutable referance to its value.
+    /// If the value does not exist it returns None.
+    /// This incraments the access frequency of the slot which the Key Value pair belongs in.
     pub fn get_mut(&mut self, key: &K) -> Option<&mut V> {
         let hash = calc_hash(&key);
         let starting_index = hash as usize;
@@ -66,6 +72,7 @@ impl<K, V> LfuCache<K, V>
         }
         return None;
     } 
+    /// `.contains_key(&K)` returns true if a key exists in the LFU cache otherwise returns false.
     pub fn contains_key(&self, key: &K) -> bool {
         let hash = calc_hash(key);
         let starting_index = hash as usize;

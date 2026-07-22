@@ -5,6 +5,8 @@ use std::hash::Hash;
 impl<K, V> LfuCache<K, V> 
     where K: Hash + Clone + Eq, 
     V: Clone + PartialEq {
+    /// `.insert(K,V)` inserts a key value pair to the LFU cache after hashing its key. 
+    /// In case the LFU cache is full it calls `.remove_least_used()` to clean up the least used slot.
     pub fn insert(&mut self, key: K, value: V) {
         let hash = calc_hash(&key);
         let starting_index = hash as usize;
@@ -36,6 +38,7 @@ impl<K, V> LfuCache<K, V>
             if i == mask { return; }
         }
     }
+    /// `.remove(K)` removes a single key and returns its value in case the key does not exist it returns None.
     pub fn remove(&mut self, key: &K) -> Option<V> {
         let hash = calc_hash(&key);
         let starting_index = hash as usize;
@@ -62,6 +65,7 @@ impl<K, V> LfuCache<K, V>
             if i == mask { return None; }
         }
     }
+    /// `.remove_least_used()` cleans up the least used slot.
     pub fn remove_least_used(&mut self) {
         let mut i: usize = 0;
         let mut least_used: Option<usize> = None;
