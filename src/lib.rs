@@ -34,4 +34,13 @@ impl<K, V> LfuCache<K, V>
             size: 0 as usize,
         });
     }
+    pub fn len(&self) -> usize {
+        return self.size;
+    }
+    pub fn is_empty(&self) -> bool {
+        if self.size == 0 {
+            return true;
+        }
+        return false;
+    }
 }
