@@ -54,3 +54,18 @@ impl<K, V> LfuCache<K, V>
         return false;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_new_with_valid_capacity() {
+        let cache: Result<LfuCache<String, String>, LfuCacheError> = LfuCache::new(4);
+        assert!(!(cache.is_err()), "[TEST]: cache failed to initialize with a perfectly valid capacity");
+    }
+    #[test]
+    fn test_new_with_invalid_capacity() {
+        let cache: Result<LfuCache<String, String>, LfuCacheError> = LfuCache::new(10);
+        assert!(cache.is_err(), "[TEST]: cache could be initialized with a capacity that is not a power of two");
+    }
+}
